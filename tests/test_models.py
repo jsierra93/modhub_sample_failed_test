@@ -16,6 +16,7 @@ FULL = {
     "bio": "Analytical engine enthusiast",
     "location": "London",
     "age": 36,
+    "slug": "ada-lovelace",
 }
 
 
@@ -70,8 +71,19 @@ def test_to_dict_keeps_every_field():
     assert set(profile_to_dict(parse_profile(FULL))) == set(FULL)
 
 
-def test_to_json_is_parseable():
-    assert '"username": "ada"' in profile_to_json(parse_profile(FULL)).replace('":"', '": "')
+def test_slug_defaults_to_the_username():
+    """Directory URLs are built from the slug, so an omitted slug must fall
+    back to the username rather than staying empty."""
+    assert Profile(username="Grace", email="g@example.com").slug == "grace"
+
+
+def test_explicit_slug_is_kept():
+    assert parse_profile(FULL).slug == "ada-lovelace"
+
+
+def test_to_json_uses_the_documented_wire_format():
+    """Downstream consumers parse this with a fixed-format reader."""
+    assert '"username": "ada"' in profile_to_json(parse_profile(FULL))
 
 
 def test_field_names_are_stable():
@@ -81,6 +93,7 @@ def test_field_names_are_stable():
         "display_name",
         "email",
         "location",
+        "slug",
         "username",
     ]
 

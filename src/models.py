@@ -19,6 +19,7 @@ class Profile(BaseModel):
     bio: Optional[str]
     location: Optional[str]
     age: Optional[int]
+    slug: str = ""
 
     class Config:
         validate_assignment = True
@@ -28,6 +29,12 @@ class Profile(BaseModel):
         if not value.replace("_", "").replace("-", "").isalnum():
             raise ValueError("username must be alphanumeric, - or _")
         return value.lower()
+
+    @validator("slug", always=True)
+    def derive_slug(cls, value: str, values: dict) -> str:
+        """Directory URLs are built from this, so it must never be empty:
+        when the caller leaves it out we fall back to the username."""
+        return value or values.get("username", "")
 
     @validator("email")
     def email_has_at(cls, value: str) -> str:
